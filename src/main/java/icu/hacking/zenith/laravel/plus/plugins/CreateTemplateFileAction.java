@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.fileChooser.FileChooser;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
@@ -24,6 +25,7 @@ public class CreateTemplateFileAction extends AnAction  {
 
         LocalFileSystem fileSystem = LocalFileSystem.getInstance();
 
+        assert project != null;
         String projectBasePath = project.getBasePath();
 
         if (projectBasePath == null) {
@@ -41,17 +43,22 @@ public class CreateTemplateFileAction extends AnAction  {
 
         VirtualFile chosenFile = FileChooser.chooseFile(descriptor, project, null);
         if (chosenFile != null) {
-            TemplateChooserDialog templateChooserDialog = new TemplateChooserDialog();
+            TemplateChooserDialog templateChooserDialog = new TemplateChooserDialog(chosenFile.getPath());
             templateChooserDialog.showAndGet();
             if (templateChooserDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                 String selectedTemplate = templateChooserDialog.getSelectedTemplate();
                 String inputFilename = templateChooserDialog.getFilename();
                 TemplateProcessor templateProcessor = new TemplateProcessor();
                 try {
-                    templateProcessor.processTemplate(chosenFile.getPath(), inputFilename, projectBasePath, selectedTemplate);
+                    String filepath = templateProcessor.processTemplate(chosenFile.getPath(), inputFilename, projectBasePath, selectedTemplate);
+                    VirtualFile file = LocalFileSystem.getInstance().refreshAndFindFileByPath(filepath);
+                    if (file == null) {
+                        Messages.showErrorDialog("Cannot find created file", "Error");
+                        return;
+                    }
+                    FileEditorManager.getInstance(project).openFile(file, true);
                 } catch (IOException ex) {
                     Messages.showErrorDialog("Cannot find template file", "Error");
-                    return ;
                 }
             }
         }

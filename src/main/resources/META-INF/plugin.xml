@@ -28,6 +28,7 @@
     <actions>
         <action id="Zenith.Laravel.Plus.CreateTemplateFileAction" class="icu.hacking.zenith.laravel.plus.plugins.CreateTemplateFileAction" text="_Create File" description="Create a new file">
             <keyboard-shortcut first-keystroke="ctrl shift z" keymap="$default"/>
+            <add-to-group group-id="ToolsMenu" anchor="last" />
         </action>
     </actions>
 </idea-plugin>

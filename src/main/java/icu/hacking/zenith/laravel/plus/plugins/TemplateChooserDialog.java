@@ -7,6 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 public class TemplateChooserDialog extends DialogWrapper {
 
@@ -14,8 +17,11 @@ public class TemplateChooserDialog extends DialogWrapper {
 
     private JTextField filenameField;
 
-    public TemplateChooserDialog() {
+    private final String selectedPath;
+
+    public TemplateChooserDialog(String selectedPath) {
         super(true);
+        this.selectedPath = selectedPath;
         init();
         setTitle("Template Chooser");
     }
@@ -25,8 +31,26 @@ public class TemplateChooserDialog extends DialogWrapper {
         JPanel dialogPanel = new JPanel();
         dialogPanel.setLayout(new BoxLayout(dialogPanel, BoxLayout.Y_AXIS));
 
-        String[] templates = {"Controller", "Service", "Logic", "LogicInterface", "Repository", "RepositoryInterface", "Model"};
+        String[] templates = {"Controller", "Bean", "Service", "Logic", "LogicInterface", "Repository", "RepositoryInterface", "Model"};
         templateComboBox = new ComboBox<>(templates);
+        templateComboBox.setEditable(true);
+        JTextField textField = (JTextField) templateComboBox.getEditor().getEditorComponent();
+        textField.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                SwingUtilities.invokeLater(() -> filter(textField.getText(), templates, templateComboBox));
+            }
+        });
+
+        JTextField readOnlyField = new JTextField();
+        readOnlyField.setEditable(false);
+        readOnlyField.setText(this.selectedPath);
+        System.out.println("this.selectedPath = " + this.selectedPath);
+        readOnlyField.setPreferredSize(new Dimension(200, readOnlyField.getPreferredSize().height));
+
+        JPanel readOnlyPanel = new JPanel();
+        readOnlyPanel.add(new JBLabel("Selected path"), BorderLayout.NORTH);
+        readOnlyPanel.add(readOnlyField, BorderLayout.CENTER);
+        dialogPanel.add(readOnlyPanel);
 
         JPanel templatePanel = new JPanel();
         templatePanel.add(new JBLabel("Choose a Template"), BorderLayout.NORTH);
@@ -43,6 +67,30 @@ public class TemplateChooserDialog extends DialogWrapper {
         dialogPanel.add(filenamePanel);
 
         return dialogPanel;
+    }
+
+    private void filter(String enteredText, String[] list, JComboBox<String> combobox) {
+        if (!enteredText.isEmpty()) {
+            ArrayList<String> itemsFound = new ArrayList<>();
+
+            for (String item : list) {
+                if (item.toLowerCase().startsWith(enteredText.toLowerCase())) {
+                    itemsFound.add(item);
+                }
+            }
+
+            if (!itemsFound.isEmpty()) {
+                combobox.setModel(new DefaultComboBoxModel<>(itemsFound.toArray(new String[0])));
+                combobox.setSelectedItem(enteredText);
+                combobox.showPopup();
+            } else {
+                combobox.hidePopup();
+            }
+        } else {
+            combobox.setModel(new DefaultComboBoxModel<>(list));
+            combobox.hidePopup();
+            combobox.setSelectedItem("");
+        }
     }
 
     public String getSelectedTemplate() {
