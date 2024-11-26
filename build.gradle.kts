@@ -5,16 +5,14 @@ plugins {
 }
 
 group = "icu.hacking.plugins"
-version = "1.0-SNAPSHOT"
+version = "1.3"
 
 repositories {
     mavenCentral()
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2023.2.5")
+    version.set("2024.3")
     type.set("PS") // Target IDE Platform
 
     plugins.set(listOf(/* Plugin Dependencies */))
@@ -26,13 +24,9 @@ tasks {
         sourceCompatibility = "17"
         targetCompatibility = "17"
     }
+
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
-    }
-
-    patchPluginXml {
-        sinceBuild.set("232")
-        untilBuild.set("242.*")
     }
 
     signPlugin {

@@ -43,7 +43,7 @@ public class CreateTemplateFileAction extends AnAction  {
 
         VirtualFile chosenFile = FileChooser.chooseFile(descriptor, project, null);
         if (chosenFile != null) {
-            TemplateChooserDialog templateChooserDialog = new TemplateChooserDialog(chosenFile.getPath());
+            TemplateChooserDialog templateChooserDialog = new TemplateChooserDialog(project, chosenFile.getPath());
             templateChooserDialog.showAndGet();
             if (templateChooserDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                 String selectedTemplate = templateChooserDialog.getSelectedTemplate();
